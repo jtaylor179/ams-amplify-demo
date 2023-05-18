@@ -1,0 +1,62 @@
+https://jh4th4egj54hgokb2y4tidetsy0pcxct.lambda-url.us-east-1.on.aws/?pageNumber=4&resultsPerPage=20&asOfDate=2023-01-01
+
+
+
+import json
+import random
+from datetime import datetime, timedelta
+
+def lambda_handler(event, context):
+    # Check if parameters are provided
+    page_number = int(event['queryStringParameters'].get('pageNumber', 1))
+    results_per_page = int(event['queryStringParameters'].get('resultsPerPage', 10))
+    as_of_date = event['queryStringParameters'].get('asOfDate', None)
+    if as_of_date:
+        as_of_date = datetime.strptime(as_of_date, "%Y-%m-%d")
+
+    # Define a function to generate a random activity
+    def random_activity(index):
+        date = datetime.now() - timedelta(days=random.randint(0, 365))
+        return {
+            "date": date.strftime("%Y-%m-%d"),
+            "groupName": f"Group {index}",
+            "accountNumber": str(index),
+            "accountName": f"Account {index}",
+            "symbolOrCusip": f"SYM{index}",
+            "securityDescription": f"Security {index}",
+            "activityType": "Buy" if random.random() < 0.5 else "Sell",
+            "quantity": random.uniform(1, 100),
+            "price": random.uniform(1, 1000),
+            "amount": random.uniform(1, 10000),
+            "debitOrCredit": "Debit" if random.random() < 0.5 else "Credit",
+            "accountType": f"Type {index % 5}",
+            "settleDate": (date + timedelta(days=3)).strftime("%Y-%m-%d"),
+            "assetClass": f"Class {index % 5}",
+            "householdName": f"Household {index % 100}"
+        }
+
+    # Generate 500 activities
+    activities = [random_activity(i) for i in range(500)]
+
+    # If as_of_date provided, filter activities
+    if as_of_date:
+        activities = [a for a in activities if datetime.strptime(a['date'], "%Y-%m-%d") <= as_of_date]
+
+    # Total activities
+    total_results = len(activities)
+
+    # Calculate start and end indices for the desired page
+    start_index = (page_number - 1) * results_per_page
+    end_index = start_index + results_per_page
+
+    # Get the desired page of activities
+    activities = activities[start_index:end_index]
+
+    # Return the results
+    return {
+        'statusCode': 200,
+        'body': json.dumps({
+            'totalResults': total_results,
+            'data': activities
+        })
+    }
