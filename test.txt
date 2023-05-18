@@ -60,3 +60,68 @@ def lambda_handler(event, context):
             'data': activities
         })
     }
+
+
+import React, { useEffect, useState } from 'react';
+import LuxonUtils from '@date-io/luxon';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { DataGrid } from '@mui/x-data-grid';
+import { TextField } from '@mui/material';
+import { Box } from '@mui/system';
+
+function format(date) {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero indexed, so +1
+  const dd = String(date.getDate()).padStart(2, '0');
+
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+export default function App() {
+  const [date, setDate] = useState(new Date());
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [rows, setRows] = useState([]);
+
+  // Call API on initial load and whenever date, pageNumber or pageSize changes
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(
+        `https://jh4th4egj54hgokb2y4tidetsy0pcxct.lambda-url.us-east-1.on.aws/?pageNumber=${pageNumber + 1}&resultsPerPage=${pageSize}&asOfDate=${format(date)}`
+      );
+      const data = await response.json();
+
+      // Assuming your response is an array of objects
+      setRows(data);
+    };
+
+    fetchData();
+  }, [date, pageNumber, pageSize]);
+
+  return (
+    <Box style={{ height: 400, width: '100%' }}>
+      <LocalizationProvider dateAdapter={LuxonUtils}>
+        <DatePicker
+          label="Select Date"
+          value={date}
+          onChange={(newValue) => {
+            setDate(newValue);
+          }}
+          renderInput={(params) => <TextField {...params} />}
+        />
+        <DataGrid
+          rows={rows}
+          // assuming your data has 'id' and 'name' properties
+          columns={[
+            { field: 'id', headerName: 'ID', width: 100 },
+            { field: 'name', headerName: 'Name', width: 150 },
+          ]}
+          pagination
+          pageSize={pageSize}
+          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+          onPageChange={(newPage) => setPageNumber(newPage)}
+        />
+      </LocalizationProvider>
+    </Box>
+  );
+}
