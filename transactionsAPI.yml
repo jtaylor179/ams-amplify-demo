@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+  title: Securities API
+  version: 1.0.0
+paths:
+  /activities:
+    get:
+      parameters:
+        - name: pageNumber
+          in: query
+          schema:
+            type: integer
+            format: int32
+          example: 1
+        - name: resultsPerPage
+          in: query
+          schema:
+            type: integer
+            format: int32
+          example: 10
+      responses:
+        '200':
+          description: A list of activities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivitiesResponse'
+components:
+  schemas:
+    Activity:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2023-01-01'
+        groupName:
+          type: string
+          example: 'Group 1'
+        accountNumber:
+          type: string
+          example: '1234567890'
+        accountName:
+          type: string
+          example: 'Account 1'
+        symbolOrCusip:
+          type: string
+          example: 'SYM1'
+        securityDescription:
+          type: string
+          example: 'Security 1'
+        activityType:
+          type: string
+          example: 'Buy'
+        quantity:
+          type: number
+          format: double
+          example: 10.5
+        price:
+          type: number
+          format: double
+          example: 200.5
+        amount:
+          type: number
+          format: double
+          example: 2050.0
+        debitOrCredit:
+          type: string
+          example: 'Debit'
+        accountType:
+          type: string
+          example: 'Type 1'
+        settleDate:
+          type: string
+          format: date
+          example: '2023-01-10'
+        assetClass:
+          type: string
+          example: 'Class 1'
+        householdName:
+          type: string
+          example: 'Household 1'
+    ActivitiesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Activity'
+        count:
+          type: integer
+          format: int32
+          example: 10
