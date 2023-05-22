@@ -5,7 +5,7 @@ import DataGridDemo from "./DataGridDemo";
 function App() {
   return (
     <div className="App">
-      <DataGridDemo></DataGridDemo>
+      //<DataGridDemo></DataGridDemo>
     </div>
   );
 }
